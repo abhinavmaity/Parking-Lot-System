@@ -1,4 +1,4 @@
-package parking_lot_system
+package main
 
 import (
 	"fmt"
@@ -37,9 +37,12 @@ func (pl *ParkingLot) ParkCar(car Car) bool {
 		return false
 	}
 
+	// Add car to parking lot and reduce available spots
+	car.ParkedAt = time.Now() // Record the time the car is parked
 	pl.ParkedCars[car.LicensePlate] = car
 	pl.AvailableSpots--
-	fmt.Printf("Car %s parked at %v\n", car.LicensePlate, time.Now())
+
+	fmt.Printf("Car %s parked at %v\n", car.LicensePlate, car.ParkedAt)
 	return true
 }
 
@@ -62,13 +65,26 @@ func main() {
 	// Create a new parking lot with 10 spots.
 	parkingLot := NewParkingLot(10)
 
-	// Park a few cars
-	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", ParkedAt: time.Now()}
-	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", ParkedAt: time.Now()}
+	// Simulate a driver parking a car
+	var licensePlate, make, model, color string
+	fmt.Println("Enter car details to park:")
 
-	parkingLot.ParkCar(car1)
-	parkingLot.ParkCar(car2)
+	// Simulate user input for car details
+	fmt.Print("License Plate: ")
+	fmt.Scan(&licensePlate)
+	fmt.Print("Make: ")
+	fmt.Scan(&make)
+	fmt.Print("Model: ")
+	fmt.Scan(&model)
+	fmt.Print("Color: ")
+	fmt.Scan(&color)
 
-	// Unpark a car
-	parkingLot.UnparkCar("ABC123")
+	// Create a Car object and attempt to park it
+	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color}
+
+	if parkingLot.ParkCar(car) {
+		fmt.Printf("Successfully parked car %s.\n", car.LicensePlate)
+	} else {
+		fmt.Println("Failed to park the car, parking lot is full.")
+	}
 }
