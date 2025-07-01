@@ -74,10 +74,15 @@ func (pl *ParkingLot) CheckIfFull() bool {
 	return false
 }
 
+// NotifySecurity notifies airport security when the parking lot is full.
+func (pl *ParkingLot) NotifySecurity() {
+	fmt.Println("Airport security has been notified that the parking lot is full.")
+}
+
 // Main function to simulate the parking lot operations.
 func main() {
 	// Create a new parking lot with 10 spots.
-	parkingLot := NewParkingLot(10)
+	parkingLot := NewParkingLot(1)
 
 	// Simulate a driver parking a car
 	var licensePlate, make, model, color string
