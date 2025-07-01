@@ -64,6 +64,16 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 	return true
 }
 
+// CheckIfFull checks if the parking lot is full.
+func (pl *ParkingLot) CheckIfFull() bool {
+	if pl.AvailableSpots == 0 {
+		fmt.Println("The parking lot is full. Please put out the 'Full' sign.")
+		return true
+	}
+	fmt.Println("Parking lot has space available.")
+	return false
+}
+
 // Main function to simulate the parking lot operations.
 func main() {
 	// Create a new parking lot with 10 spots.
@@ -92,6 +102,9 @@ func main() {
 		fmt.Println("Failed to park the car, parking lot is full.")
 	}
 
+	// Check if the parking lot is full
+	parkingLot.CheckIfFull()
+
 	// Simulate driver unparking a car
 	var unparkPlate string
 	fmt.Print("\nEnter License Plate to Unpark: ")
@@ -102,4 +115,7 @@ func main() {
 	} else {
 		fmt.Println("Failed to unpark the car.")
 	}
+
+	// Check parking lot status after unparking
+	parkingLot.CheckIfFull()
 }
