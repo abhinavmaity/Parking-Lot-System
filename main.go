@@ -68,6 +68,7 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 func (pl *ParkingLot) CheckIfFull() bool {
 	if pl.AvailableSpots == 0 {
 		fmt.Println("The parking lot is full. Please put out the 'Full' sign.")
+		pl.NotifySecurity()
 		return true
 	}
 	fmt.Println("Parking lot has space available.")
@@ -77,6 +78,11 @@ func (pl *ParkingLot) CheckIfFull() bool {
 // NotifySecurity notifies airport security when the parking lot is full.
 func (pl *ParkingLot) NotifySecurity() {
 	fmt.Println("Airport security has been notified that the parking lot is full.")
+}
+
+// NotifyOwner notifies the parking lot owner to take down the 'Full' sign.
+func (pl *ParkingLot) NotifyOwner() {
+	fmt.Println("For Owner : Parking lot has available space again.")
 }
 
 // Main function to simulate the parking lot operations.
@@ -107,7 +113,7 @@ func main() {
 		fmt.Println("Failed to park the car, parking lot is full.")
 	}
 
-	// Check if the parking lot is full
+	// Check if the parking lot is full and notify security
 	parkingLot.CheckIfFull()
 
 	// Simulate driver unparking a car
@@ -123,4 +129,7 @@ func main() {
 
 	// Check parking lot status after unparking
 	parkingLot.CheckIfFull()
+
+	// Notify the owner that there's space available again
+	parkingLot.NotifyOwner()
 }
