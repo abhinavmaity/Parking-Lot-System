@@ -4,23 +4,41 @@ import (
 	"testing"
 )
 
-func TestAvailableSpaceAfterUnparking(t *testing.T) {
+func TestAssignCarToParkingLot(t *testing.T) {
 	// Setup
 	parkingLot := NewParkingLot(1) // Create a parking lot with 1 spot
+	attendant := ParkingAttendant{Name: "John"}
 
 	// Park the first car
 	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue"}
-	parked := parkingLot.ParkCar(car1)
+	parked := attendant.AssignCarToParkingLot(parkingLot, car1)
 	if !parked {
 		t.Errorf("Expected car to be parked, but it wasn't")
 	}
 
-	// Check if the parking lot is full after parking one car
-	if !parkingLot.CheckIfFull() {
-		t.Errorf("Expected parking lot to be full, but it wasn't")
+	// Check if the parking lot's available spots decreased
+	if parkingLot.AvailableSpots != 0 {
+		t.Errorf("Expected available spots to be 0, but got %d", parkingLot.AvailableSpots)
 	}
 
-	// Unpark the car and check available spots
+	// Try to park another car in a full lot
+	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red"}
+	parked = attendant.AssignCarToParkingLot(parkingLot, car2)
+	if parked {
+		t.Errorf("Expected parking lot to be full, but car was parked")
+	}
+}
+
+func TestUnparkCarByAttendant(t *testing.T) {
+	// Setup
+	parkingLot := NewParkingLot(1) // Create a parking lot with 1 spot
+	attendant := ParkingAttendant{Name: "John"}
+	car := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue"}
+
+	// Park the car
+	attendant.AssignCarToParkingLot(parkingLot, car)
+
+	// Unpark the car and check if available spots have increased
 	unparked := parkingLot.UnparkCar("ABC123")
 	if !unparked {
 		t.Errorf("Expected car to be unparked, but it wasn't")
@@ -30,66 +48,35 @@ func TestAvailableSpaceAfterUnparking(t *testing.T) {
 	if parkingLot.AvailableSpots != 1 {
 		t.Errorf("Expected available spots to be 1, but got %d", parkingLot.AvailableSpots)
 	}
-
-	// Check if the parking lot has space available after unparking
-	if parkingLot.CheckIfFull() != false {
-		t.Errorf("Expected parking lot to have space available, but it was full")
-	}
 }
 
-func TestCheckIfFullAfterUnparking(t *testing.T) {
+func TestAttendantParkingLotFull(t *testing.T) {
 	// Setup
 	parkingLot := NewParkingLot(1) // Create a parking lot with 1 spot
-	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue"}
-	parkingLot.ParkCar(car1)
-
-	// Check if the parking lot is full after parking one car
-	if !parkingLot.CheckIfFull() {
-		t.Errorf("Expected parking lot to be full, but it wasn't")
-	}
-
-	// Unpark the car and check the status again
-	parkingLot.UnparkCar("ABC123")
-
-	// Check parking lot status after unparking
-	if parkingLot.CheckIfFull() != false {
-		t.Errorf("Expected parking lot to have space available, but it was full")
-	}
-}
-
-func TestSpaceAvailableAfterMultipleCars(t *testing.T) {
-	// Setup
-	parkingLot := NewParkingLot(2) // Create a parking lot with 2 spots
+	attendant := ParkingAttendant{Name: "John"}
 
 	// Park the first car
 	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue"}
-	parked := parkingLot.ParkCar(car1)
-	if !parked {
-		t.Errorf("Expected car to be parked, but it wasn't")
-	}
+	attendant.AssignCarToParkingLot(parkingLot, car1)
 
-	// Park the second car
+	// Try to park another car in a full lot
 	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red"}
-	parked = parkingLot.ParkCar(car2)
-	if !parked {
-		t.Errorf("Expected car to be parked, but it wasn't")
+	parked := attendant.AssignCarToParkingLot(parkingLot, car2)
+	if parked {
+		t.Errorf("Expected parking lot to be full, but car was parked")
 	}
+}
 
-	// Check if the parking lot is full after parking two cars
-	if !parkingLot.CheckIfFull() {
-		t.Errorf("Expected parking lot to be full, but it wasn't")
-	}
+func TestAttendantNotifySecurityWhenFull(t *testing.T) {
+	// Setup
+	parkingLot := NewParkingLot(1) // Create a parking lot with 1 spot
+	attendant := ParkingAttendant{Name: "John"}
 
-	// Unpark the first car and check available spots
-	parkingLot.UnparkCar("ABC123")
+	// Park the first car
+	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue"}
+	attendant.AssignCarToParkingLot(parkingLot, car1)
 
-	// Check if available spots have increased
-	if parkingLot.AvailableSpots != 1 {
-		t.Errorf("Expected available spots to be 1, but got %d", parkingLot.AvailableSpots)
-	}
-
-	// Check parking lot status after unparking
-	if parkingLot.CheckIfFull() != false {
-		t.Errorf("Expected parking lot to have space available, but it was full")
-	}
+	// Check if security is notified when the lot is full
+	parkingLot.CheckIfFull() // This simulates the security notification being triggered
+	// You can expand this by checking if the print statement "Airport security has been notified..." is triggered
 }

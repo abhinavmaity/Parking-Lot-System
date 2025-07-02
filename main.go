@@ -21,6 +21,11 @@ type ParkingLot struct {
 	ParkedCars     map[string]Car // Map of license plates to cars
 }
 
+// ParkingAttendant represents the parking attendant who parks cars.
+type ParkingAttendant struct {
+	Name string
+}
+
 // NewParkingLot creates a new parking lot with the given capacity.
 func NewParkingLot(capacity int) *ParkingLot {
 	return &ParkingLot{
@@ -64,6 +69,16 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 	return true
 }
 
+// AssignCarToAttendant assigns a car to a parking attendant for parking.
+func (attendant *ParkingAttendant) AssignCarToParkingLot(pl *ParkingLot, car Car) bool {
+	if pl.ParkCar(car) {
+		fmt.Printf("Parking attendant %s successfully parked the car %s.\n", attendant.Name, car.LicensePlate)
+		return true
+	}
+	fmt.Println("Failed to park the car.")
+	return false
+}
+
 // CheckIfFull checks if the parking lot is full.
 func (pl *ParkingLot) CheckIfFull() bool {
 	if pl.AvailableSpots == 0 {
@@ -90,6 +105,9 @@ func main() {
 	// Create a new parking lot with 10 spots.
 	parkingLot := NewParkingLot(1)
 
+	// Create a parking attendant
+	attendant := ParkingAttendant{Name: "Attendant"}
+
 	// Simulate a driver parking a car
 	var licensePlate, make, model, color string
 	fmt.Println("Enter car details to park:")
@@ -104,14 +122,11 @@ func main() {
 	fmt.Print("Color: ")
 	fmt.Scan(&color)
 
-	// Create a Car object and attempt to park it
+	// Create a Car object and attempt to park it via the parking attendant
 	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color}
 
-	if parkingLot.ParkCar(car) {
-		fmt.Printf("Successfully parked car %s.\n", car.LicensePlate)
-	} else {
-		fmt.Println("Failed to park the car, parking lot is full.")
-	}
+	// Parking attendant parks the car
+	attendant.AssignCarToParkingLot(parkingLot, car)
 
 	// Check if the parking lot is full and notify security
 	parkingLot.CheckIfFull()
