@@ -65,7 +65,11 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 
 	// Calculate how long the car was parked
 	timeParked := time.Since(car.ParkedAt)
+
+	// Calculate the charge based on parking time (Rs 50 per hour)
+	charge := float64(timeParked.Hours()) * 50.0
 	fmt.Printf("Car %s unparked. It was parked for: %v\n", car.LicensePlate, timeParked)
+	fmt.Printf("Charge for parking: Rs%.2f\n", charge)
 	return true
 }
 
