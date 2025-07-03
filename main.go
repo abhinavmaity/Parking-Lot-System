@@ -100,13 +100,23 @@ func (pl *ParkingLot) NotifyOwner() {
 	fmt.Println("For Owner : Parking lot has available space again.")
 }
 
+// FindCar helps a driver find their car by its license plate.
+func (pl *ParkingLot) FindCar(licensePlate string) {
+	car, exists := pl.ParkedCars[licensePlate]
+	if exists {
+		fmt.Printf("Car %s found. It was parked at: %v\n", car.LicensePlate, car.ParkedAt)
+	} else {
+		fmt.Println("Car not found.")
+	}
+}
+
 // Main function to simulate the parking lot operations.
 func main() {
 	// Create a new parking lot with 10 spots.
 	parkingLot := NewParkingLot(1)
 
 	// Create a parking attendant
-	attendant := ParkingAttendant{Name: "Attendant"}
+	attendant := ParkingAttendant{Name: "Rahul"}
 
 	// Simulate a driver parking a car
 	var licensePlate, make, model, color string
@@ -130,6 +140,14 @@ func main() {
 
 	// Check if the parking lot is full and notify security
 	parkingLot.CheckIfFull()
+
+	// Driver wants to find their car by license plate
+	var findPlate string
+	fmt.Print("\nEnter License Plate to Find: ")
+	fmt.Scan(&findPlate)
+
+	// Find the car in the parking lot
+	parkingLot.FindCar(findPlate)
 
 	// Simulate driver unparking a car
 	var unparkPlate string
