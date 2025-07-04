@@ -12,6 +12,7 @@ type Car struct {
 	Model        string
 	Color        string
 	ParkedAt     time.Time
+	isHandicap   bool
 }
 
 // ParkingLot represents a parking lot with a certain capacity.
@@ -40,7 +41,7 @@ func NewParkingLot(name string, capacity int) *ParkingLot {
 // ParkCar parks a car in the parking lot.
 func (pl *ParkingLot) ParkCar(car Car) bool {
 	if pl.AvailableSpots == 0 {
-		fmt.Printf("Parking lot is full!\n", pl.Name)
+		fmt.Printf("Parking lot %s is full!\n", pl.Name)
 		return false
 	}
 
@@ -78,9 +79,23 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 // DirectCarToLot directs a car to the lot with the least number of cars.
 func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) bool {
 	var selectedLot *ParkingLot
-	for _, lot := range plots {
-		if selectedLot == nil || lot.AvailableSpots < selectedLot.AvailableSpots {
-			selectedLot = lot
+
+	// If it's a handicap car, prioritize parking in Handicap Lot
+	if car.isHandicap {
+		for _, lot := range plots {
+			if lot.Name == "Handicap Lot" && lot.AvailableSpots > 0 {
+				selectedLot = lot
+				break
+			}
+		}
+	}
+
+	// If no handicap lot space available, direct to the lot with the least cars
+	if selectedLot == nil {
+		for _, lot := range plots {
+			if selectedLot == nil || lot.AvailableSpots < selectedLot.AvailableSpots {
+				selectedLot = lot
+			}
 		}
 	}
 
@@ -91,16 +106,6 @@ func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) 
 	}
 
 	fmt.Println("No available lot found for parking.")
-	return false
-}
-
-// AssignCarToAttendant assigns a car to a parking attendant for parking.
-func (attendant *ParkingAttendant) AssignCarToParkingLot(pl *ParkingLot, car Car) bool {
-	if pl.ParkCar(car) {
-		fmt.Printf("Parking attendant %s successfully parked the car %s.\n", attendant.Name, car.LicensePlate)
-		return true
-	}
-	fmt.Println("Failed to park the car.")
 	return false
 }
 
@@ -140,13 +145,14 @@ func main() {
 	// Create multiple parking lots
 	lotA := NewParkingLot("A", 5)
 	lotB := NewParkingLot("B", 5)
+	handicapLot := NewParkingLot("Handicap Lot", 3) // Special lot for handicap cars
 
 	// Create a parking attendant
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Simulate a driver parking a car
+	// Simulate a handicap driver parking a car
 	var licensePlate, make, model, color string
-	fmt.Println("Enter car details to park:")
+	fmt.Println("Enter car details to park (for Handicap Parking):")
 
 	// Simulate user input for car details
 	fmt.Print("License Plate: ")
@@ -158,15 +164,16 @@ func main() {
 	fmt.Print("Color: ")
 	fmt.Scan(&color)
 
-	// Create a Car object and attempt to park it via the parking attendant
-	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color}
+	// Create a Car object and mark it as a handicap car
+	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, IsHandicap: true}
 
-	// Create a slice of parking lots and direct the car to the lot with the least cars
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB}, car)
+	// Create a slice of parking lots and direct the car to the handicap lot if available
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car)
 
 	// Check if the parking lot is full and notify security
 	lotA.CheckIfFull()
 	lotB.CheckIfFull()
+	handicapLot.CheckIfFull()
 
 	// Driver wants to find their car by license plate
 	var findPlate string
@@ -180,12 +187,15 @@ func main() {
 
 	lotA.UnparkCar(unparkPlate)
 	lotB.UnparkCar(unparkPlate)
+	handicapLot.UnparkCar(unparkPlate)
 
 	// Check parking lot status after unparking
 	lotA.CheckIfFull()
 	lotB.CheckIfFull()
+	handicapLot.CheckIfFull()
 
 	// Notify the owner that there's space available again
 	lotA.NotifyOwner()
 	lotB.NotifyOwner()
+	handicapLot.NotifyOwner()
 }
