@@ -12,7 +12,8 @@ type Car struct {
 	Model        string
 	Color        string
 	ParkedAt     time.Time
-	isHandicap   bool
+	IsHandicap   bool
+	Size         string // Added a Size attribute to categorize car sizes (small, medium, large)
 }
 
 // ParkingLot represents a parking lot with a certain capacity.
@@ -50,7 +51,7 @@ func (pl *ParkingLot) ParkCar(car Car) bool {
 	pl.ParkedCars[car.LicensePlate] = car
 	pl.AvailableSpots--
 
-	fmt.Printf("Car %s parked at %v\n", car.LicensePlate, car.ParkedAt)
+	fmt.Printf("Car %s parked at %v in lot %s\n", car.LicensePlate, car.ParkedAt, pl.Name)
 	return true
 }
 
@@ -80,18 +81,15 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) bool {
 	var selectedLot *ParkingLot
 
-	// If it's a handicap car, prioritize parking in Handicap Lot
-	if car.isHandicap {
+	// If it's a large car, prioritize parking in the lot with the most available space
+	if car.Size == "large" {
 		for _, lot := range plots {
-			if lot.Name == "Handicap Lot" && lot.AvailableSpots > 0 {
+			if selectedLot == nil || lot.AvailableSpots > selectedLot.AvailableSpots {
 				selectedLot = lot
-				break
 			}
 		}
-	}
-
-	// If no handicap lot space available, direct to the lot with the least cars
-	if selectedLot == nil {
+	} else {
+		// For non-large cars, direct to the lot with the least number of cars
 		for _, lot := range plots {
 			if selectedLot == nil || lot.AvailableSpots < selectedLot.AvailableSpots {
 				selectedLot = lot
@@ -130,16 +128,6 @@ func (pl *ParkingLot) NotifyOwner() {
 	fmt.Println("For Owner : Parking lot has available space again.")
 }
 
-// FindCar helps a driver find their car by its license plate.
-func (pl *ParkingLot) FindCar(licensePlate string) {
-	car, exists := pl.ParkedCars[licensePlate]
-	if exists {
-		fmt.Printf("Car %s found. It was parked at: %v\n", car.LicensePlate, car.ParkedAt)
-	} else {
-		fmt.Println("Car not found.")
-	}
-}
-
 // Main function to simulate the parking lot operations.
 func main() {
 	// Create multiple parking lots
@@ -150,9 +138,9 @@ func main() {
 	// Create a parking attendant
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Simulate a handicap driver parking a car
-	var licensePlate, make, model, color string
-	fmt.Println("Enter car details to park (for Handicap Parking):")
+	// Simulate a large driver parking a car
+	var licensePlate, make, model, color, size string
+	fmt.Println("Enter car details to park (for Large Car Parking):")
 
 	// Simulate user input for car details
 	fmt.Print("License Plate: ")
@@ -163,11 +151,13 @@ func main() {
 	fmt.Scan(&model)
 	fmt.Print("Color: ")
 	fmt.Scan(&color)
+	fmt.Print("Size (small, medium, large): ")
+	fmt.Scan(&size)
 
-	// Create a Car object and mark it as a handicap car
-	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, IsHandicap: true}
+	// Create a Car object and mark it as a large car
+	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, Size: size}
 
-	// Create a slice of parking lots and direct the car to the handicap lot if available
+	// Create a slice of parking lots and direct the large car to the lot with the most available space
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car)
 
 	// Check if the parking lot is full and notify security
