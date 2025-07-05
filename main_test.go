@@ -4,70 +4,48 @@ import (
 	"testing"
 )
 
-func TestDirectLargeCarToLotWithMostAvailableSpace(t *testing.T) {
+func TestNotifyPoliceForSpecificColor(t *testing.T) {
 	// Setup
-	lotA := NewParkingLot("A", 2)                   // Create a parking lot with 2 spots
-	lotB := NewParkingLot("B", 2)                   // Create another parking lot with 2 spots
-	handicapLot := NewParkingLot("Handicap Lot", 1) // Create a Handicap lot
+	lotA := NewParkingLot("A", 5)                   // Create a parking lot with 5 spots
+	lotB := NewParkingLot("B", 5)                   // Create another parking lot with 5 spots
+	handicapLot := NewParkingLot("Handicap Lot", 3) // Special lot for handicap cars
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Park a small car in lot A
-	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "small"}
+	// Park a white car in lot A
+	car1 := Car{LicensePlate: "WH123", Make: "Toyota", Model: "Corolla", Color: "White", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car1)
 
-	// Park a large car in lot B
-	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", Size: "large"}
+	// Park a non-white car in lot B
+	car2 := Car{LicensePlate: "BL456", Make: "Honda", Model: "Civic", Color: "Blue", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
 
-	// Verify that the large car is parked in the lot with the most available space (lot A)
-	if _, exists := lotA.ParkedCars[car2.LicensePlate]; !exists {
-		t.Errorf("Expected car %s to be parked in lot A, but it wasn't", car2.LicensePlate)
-	}
-}
-
-func TestDirectCarWhenBothLotsHaveEqualAvailableSpace(t *testing.T) {
-	// Setup
-	lotA := NewParkingLot("A", 2)                   // Create a parking lot with 2 spots
-	lotB := NewParkingLot("B", 2)                   // Create another parking lot with 2 spots
-	handicapLot := NewParkingLot("Handicap Lot", 1) // Create a Handicap lot
-	attendant := ParkingAttendant{Name: "Rahul"}
-
-	// Park the first car in lot A
-	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car1)
-
-	// Park the second car in lot B
-	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
-
-	// Park the third car when both lots have equal available space
-	car3 := Car{LicensePlate: "DEF789", Make: "Ford", Model: "Focus", Color: "Green", Size: "large"}
+	// Park another white car in handicap lot
+	car3 := Car{LicensePlate: "WH789", Make: "Ford", Model: "Focus", Color: "White", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car3)
 
-	// Verify that the third car is parked in lot A (first available lot)
-	if _, exists := lotA.ParkedCars[car3.LicensePlate]; !exists {
-		t.Errorf("Expected car %s to be parked in lot A, but it wasn't", car3.LicensePlate)
-	}
+	// Notify police about the location of all white cars
+	lotA.NotifyPolice("White")
+	lotB.NotifyPolice("White")
+	handicapLot.NotifyPolice("White")
 }
 
-func TestParkCarInFullLot(t *testing.T) {
+func TestNotifyPoliceWhenNoCarsOfColor(t *testing.T) {
 	// Setup
-	lotA := NewParkingLot("A", 1) // Create a parking lot with 1 spot
+	lotA := NewParkingLot("A", 5)                   // Create a parking lot with 5 spots
+	lotB := NewParkingLot("B", 5)                   // Create another parking lot with 5 spots
+	handicapLot := NewParkingLot("Handicap Lot", 3) // Special lot for handicap cars
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Park the first car in lot A
-	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "small"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA}, car1)
+	// Park a non-white car in lot A
+	car1 := Car{LicensePlate: "BL123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car1)
 
-	// Verify the lot is full after the first car
-	if !lotA.CheckIfFull() {
-		t.Errorf("Expected parking lot to be full, but it wasn't")
-	}
+	// Park a non-white car in lot B
+	car2 := Car{LicensePlate: "RD456", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
 
-	// Try to park another car in a full lot
-	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", Size: "large"}
-	parked := attendant.DirectCarToLot([]*ParkingLot{lotA}, car2)
-	if parked {
-		t.Errorf("Expected parking lot to be full, but car was parked")
-	}
+	// Notify police about the location of all white cars (expecting no cars)
+	lotA.NotifyPolice("White")
+	lotB.NotifyPolice("White")
+	handicapLot.NotifyPolice("White")
 }

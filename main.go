@@ -13,7 +13,7 @@ type Car struct {
 	Color        string
 	ParkedAt     time.Time
 	IsHandicap   bool
-	Size         string // Added a Size attribute to categorize car sizes (small, medium, large)
+	Size         string
 }
 
 // ParkingLot represents a parking lot with a certain capacity.
@@ -77,17 +77,6 @@ func (pl *ParkingLot) UnparkCar(licensePlate string) bool {
 	return true
 }
 
-// CheckIfFull checks if the parking lot is full.
-func (pl *ParkingLot) CheckIfFull() bool {
-	if pl.AvailableSpots == 0 {
-		fmt.Println("The parking lot is full. Please put out the 'Full' sign.")
-		pl.NotifySecurity()
-		return true
-	}
-	fmt.Println("Parking lot has space available.")
-	return false
-}
-
 // DirectCarToLot directs a car to the lot with the least number of cars.
 func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) bool {
 	var selectedLot *ParkingLot
@@ -101,12 +90,8 @@ func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) 
 		}
 	} else {
 		// For non-large cars, direct to the lot with the least number of cars
-		// If both lots have equal available spots, prioritize the first lot
 		for _, lot := range plots {
 			if selectedLot == nil || lot.AvailableSpots < selectedLot.AvailableSpots {
-				selectedLot = lot
-			} else if lot.AvailableSpots == selectedLot.AvailableSpots && lot.Name < selectedLot.Name {
-				// Prioritize the first lot when both have equal available spots
 				selectedLot = lot
 			}
 		}
@@ -122,6 +107,17 @@ func (attendant *ParkingAttendant) DirectCarToLot(plots []*ParkingLot, car Car) 
 	return false
 }
 
+// CheckIfFull checks if the parking lot is full.
+func (pl *ParkingLot) CheckIfFull() bool {
+	if pl.AvailableSpots == 0 {
+		fmt.Println("The parking lot is full. Please put out the 'Full' sign.")
+		pl.NotifySecurity()
+		return true
+	}
+	fmt.Println("Parking lot has space available.")
+	return false
+}
+
 // NotifySecurity notifies airport security when the parking lot is full.
 func (pl *ParkingLot) NotifySecurity() {
 	fmt.Println("Airport security has been notified that the parking lot is full.")
@@ -130,6 +126,26 @@ func (pl *ParkingLot) NotifySecurity() {
 // NotifyOwner notifies the parking lot owner to take down the 'Full' sign.
 func (pl *ParkingLot) NotifyOwner() {
 	fmt.Println("For Owner : Parking lot has available space again.")
+}
+
+// FindCar helps a driver find their car by its license plate.
+func (pl *ParkingLot) FindCar(licensePlate string) {
+	car, exists := pl.ParkedCars[licensePlate]
+	if exists {
+		fmt.Printf("Car %s found. It was parked at: %v\n", car.LicensePlate, car.ParkedAt)
+	} else {
+		fmt.Println("Car not found.")
+	}
+}
+
+// NotifyPolice finds all cars with a specific attribute (like color) and notifies the police.
+func (pl *ParkingLot) NotifyPolice(color string) {
+	fmt.Printf("Searching for all %s cars...\n", color)
+	for _, car := range pl.ParkedCars {
+		if car.Color == color {
+			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s at %v\n", car.Make, car.LicensePlate, pl.Name, car.ParkedAt)
+		}
+	}
 }
 
 // Main function to simulate the parking lot operations.
@@ -142,9 +158,9 @@ func main() {
 	// Create a parking attendant
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Simulate a large driver parking a car
+	// Simulate parking cars
 	var licensePlate, make, model, color, size string
-	fmt.Println("Enter car details to park (for Large Car Parking):")
+	fmt.Println("Enter car details to park:")
 
 	// Simulate user input for car details
 	fmt.Print("License Plate: ")
@@ -158,16 +174,25 @@ func main() {
 	fmt.Print("Size (small, medium, large): ")
 	fmt.Scan(&size)
 
-	// Create a Car object and mark it as a large car
+	// Create a Car object
 	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, Size: size}
 
-	// Create a slice of parking lots and direct the large car to the lot with the most available space
+	// Park the car in the first available lot
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car)
 
 	// Check if the parking lot is full and notify security
-	lotA.CheckIfFull()
-	lotB.CheckIfFull()
-	handicapLot.CheckIfFull()
+	lotA.NotifySecurity()
+	lotB.NotifySecurity()
+	handicapLot.NotifySecurity()
+
+	// Simulate parking a white car
+	whiteCar := Car{LicensePlate: "WH123", Make: "Toyota", Model: "Corolla", Color: "White", Size: "medium"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, whiteCar)
+
+	// Notify police about the location of all white cars
+	lotA.NotifyPolice("White")
+	lotB.NotifyPolice("White")
+	handicapLot.NotifyPolice("White")
 
 	// Driver wants to find their car by license plate
 	var findPlate string
@@ -184,11 +209,6 @@ func main() {
 	handicapLot.UnparkCar(unparkPlate)
 
 	// Check parking lot status after unparking
-	lotA.CheckIfFull()
-	lotB.CheckIfFull()
-	handicapLot.CheckIfFull()
-
-	// Notify the owner that there's space available again
 	lotA.NotifyOwner()
 	lotB.NotifyOwner()
 	handicapLot.NotifyOwner()
