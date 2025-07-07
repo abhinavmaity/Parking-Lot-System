@@ -140,7 +140,7 @@ func (pl *ParkingLot) FindCar(licensePlate string) {
 
 // NotifyPolice finds all cars with a specific attribute (like color) and notifies the police.
 func (pl *ParkingLot) NotifyPolice(make, color string) {
-	fmt.Printf("Searching for all %s cars...\n", color)
+	fmt.Printf("Searching for all %s %s cars...\n", color, make)
 	for _, car := range pl.ParkedCars {
 		if car.Make == make && car.Color == color {
 			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s at %v. Directed by: %s\n", car.Make, car.LicensePlate, pl.Name, car.ParkedAt, "Parking Attendant") // Assuming "Parking Attendant" is a placeholder
@@ -185,14 +185,14 @@ func main() {
 	lotB.NotifySecurity()
 	handicapLot.NotifySecurity()
 
-	// Simulate parking a blue Toyota car for UC13
-	blueToyotaCar := Car{LicensePlate: "BT123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, blueToyotaCar)
+	// Simulate parking a BMW car for UC14
+	bmwCar := Car{LicensePlate: "BMW123", Make: "BMW", Model: "X5", Color: "Black", Size: "large"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, bmwCar)
 
-	// Notify police about the location of all blue Toyota cars
-	lotA.NotifyPolice("Toyota", "Blue")
-	lotB.NotifyPolice("Toyota", "Blue")
-	handicapLot.NotifyPolice("Toyota", "Blue")
+	// Notify police about the location of all BMW cars
+	lotA.NotifyPolice("BMW", "Black")
+	lotB.NotifyPolice("BMW", "Black")
+	handicapLot.NotifyPolice("BMW", "Black")
 
 	// Driver wants to find their car by license plate
 	var findPlate string
