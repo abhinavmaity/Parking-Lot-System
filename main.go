@@ -138,12 +138,14 @@ func (pl *ParkingLot) FindCar(licensePlate string) {
 	}
 }
 
-// NotifyPolice finds all cars with a specific attribute (like color) and notifies the police.
-func (pl *ParkingLot) NotifyPolice(make, color string) {
-	fmt.Printf("Searching for all %s %s cars...\n", color, make)
+// NotifyPolice finds all cars that were parked in the last 30 minutes and notifies the police.
+func (pl *ParkingLot) NotifyPolice() {
+	fmt.Println("Searching for cars parked in the last 30 minutes...")
+	currentTime := time.Now()
 	for _, car := range pl.ParkedCars {
-		if car.Make == make && car.Color == color {
-			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s at %v. Directed by: %s\n", car.Make, car.LicensePlate, pl.Name, car.ParkedAt, "Parking Attendant") // Assuming "Parking Attendant" is a placeholder
+		// Check if the car was parked in the last 30 minutes
+		if currentTime.Sub(car.ParkedAt) <= 30*time.Minute {
+			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s at %v. Directed by: %s\n", car.Make, car.LicensePlate, pl.Name, car.ParkedAt, "Parking Attendant")
 		}
 	}
 }
@@ -185,14 +187,18 @@ func main() {
 	lotB.NotifySecurity()
 	handicapLot.NotifySecurity()
 
-	// Simulate parking a BMW car for UC14
-	bmwCar := Car{LicensePlate: "BMW123", Make: "BMW", Model: "X5", Color: "Black", Size: "large"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, bmwCar)
+	/// Simulate parking another car that will be parked in the last 30 minutes
+	car2 := Car{LicensePlate: "XYZ123", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
 
-	// Notify police about the location of all BMW cars
-	lotA.NotifyPolice("BMW", "Black")
-	lotB.NotifyPolice("BMW", "Black")
-	handicapLot.NotifyPolice("BMW", "Black")
+	// Simulate cars being parked in the last 30 minutes
+	car3 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Corolla", Color: "Blue", Size: "small"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car3)
+
+	// Notify police about the cars parked in the last 30 minutes
+	lotA.NotifyPolice()
+	lotB.NotifyPolice()
+	handicapLot.NotifyPolice()
 
 	// Driver wants to find their car by license plate
 	var findPlate string
