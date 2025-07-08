@@ -14,6 +14,7 @@ type Car struct {
 	ParkedAt     time.Time
 	IsHandicap   bool
 	Size         string
+	Row          string
 }
 
 // ParkingLot represents a parking lot with a certain capacity.
@@ -138,14 +139,13 @@ func (pl *ParkingLot) FindCar(licensePlate string) {
 	}
 }
 
-// NotifyPolice finds all cars that were parked in the last 30 minutes and notifies the police.
+// NotifyPolice finds all small handicap cars parked on rows B or D and notifies the police.
 func (pl *ParkingLot) NotifyPolice() {
-	fmt.Println("Searching for cars parked in the last 30 minutes...")
-	currentTime := time.Now()
+	fmt.Println("Searching for small handicap cars parked on rows B or D...")
 	for _, car := range pl.ParkedCars {
-		// Check if the car was parked in the last 30 minutes
-		if currentTime.Sub(car.ParkedAt) <= 30*time.Minute {
-			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s at %v. Directed by: %s\n", car.Make, car.LicensePlate, pl.Name, car.ParkedAt, "Parking Attendant")
+		// Check if the car is small, handicap, and parked in row B or D
+		if car.Size == "small" && car.IsHandicap && (car.Row == "B" || car.Row == "D") {
+			fmt.Printf("Car %s (License Plate: %s) is parked in lot %s, row %s at %v. Directed by: %s\n", car.Make, car.LicensePlate, pl.Name, car.Row, car.ParkedAt, "Parking Attendant") // Assuming "Parking Attendant" is a placeholder
 		}
 	}
 }
@@ -161,7 +161,7 @@ func main() {
 	attendant := ParkingAttendant{Name: "Rahul"}
 
 	// Simulate parking cars
-	var licensePlate, make, model, color, size string
+	var licensePlate, make, model, color, size, row string
 	fmt.Println("Enter car details to park:")
 
 	// Simulate user input for car details
@@ -175,27 +175,19 @@ func main() {
 	fmt.Scan(&color)
 	fmt.Print("Size (small, medium, large): ")
 	fmt.Scan(&size)
+	fmt.Print("Row (A, B, D): ")
+	fmt.Scan(&row)
 
-	// Create a Car object
-	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, Size: size}
+	// Create a Car object and mark it as a small handicap car
+	car := Car{LicensePlate: licensePlate, Make: make, Model: model, Color: color, Size: size, Row: row, IsHandicap: true}
 
 	// Park the car in the first available lot
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car)
 
-	// Check if the parking lot is full and notify security
-	lotA.NotifySecurity()
-	lotB.NotifySecurity()
-	handicapLot.NotifySecurity()
-
-	/// Simulate parking another car that will be parked in the last 30 minutes
-	car2 := Car{LicensePlate: "XYZ123", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
+	// Simulate parking another small handicap car on row D
+	car2 := Car{LicensePlate: "ABC123", Make: "Honda", Model: "Civic", Color: "Red", Size: "small", Row: "D", IsHandicap: true}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
-
-	// Simulate cars being parked in the last 30 minutes
-	car3 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Corolla", Color: "Blue", Size: "small"}
-	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car3)
-
-	// Notify police about the cars parked in the last 30 minutes
+	// Notify police about the small handicap cars parked on rows B or D
 	lotA.NotifyPolice()
 	lotB.NotifyPolice()
 	handicapLot.NotifyPolice()
