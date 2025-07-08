@@ -2,50 +2,64 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
-func TestNotifyPoliceForBMWCars(t *testing.T) {
+func TestNotifyPoliceForCarsParkedInLast30Minutes(t *testing.T) {
 	// Setup
 	lotA := NewParkingLot("A", 5)                   // Create a parking lot with 5 spots
 	lotB := NewParkingLot("B", 5)                   // Create another parking lot with 5 spots
 	handicapLot := NewParkingLot("Handicap Lot", 3) // Special lot for handicap cars
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Park a black BMW car in lot A
-	car1 := Car{LicensePlate: "BMW123", Make: "BMW", Model: "X5", Color: "Black", Size: "large"}
+	// Park a car that was just parked (in the last 30 minutes)
+	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car1)
 
-	// Park a non-BMW car in lot B
-	car2 := Car{LicensePlate: "GT456", Make: "Toyota", Model: "Camry", Color: "Green", Size: "medium"}
+	// Wait for a second to simulate parking time
+	time.Sleep(time.Second)
+
+	// Park another car that was just parked (in the last 30 minutes)
+	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
 
-	// Park another black BMW car in handicap lot
-	car3 := Car{LicensePlate: "BMW789", Make: "BMW", Model: "3 Series", Color: "Black", Size: "medium"}
+	// Park a car that was parked more than 30 minutes ago
+	car3 := Car{LicensePlate: "DEF789", Make: "Ford", Model: "Focus", Color: "Green", Size: "large"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car3)
 
-	// Notify police about the location of all BMW cars
-	lotA.NotifyPolice("BMW", "Black")
-	lotB.NotifyPolice("BMW", "Black")
-	handicapLot.NotifyPolice("BMW", "Black")
+	// Wait for more than 30 minutes to simulate the 30-minute threshold
+	time.Sleep(30 * time.Minute)
+
+	// Notify police about the cars parked in the last 30 minutes
+	lotA.NotifyPolice()
+	lotB.NotifyPolice()
+	handicapLot.NotifyPolice()
 }
 
-func TestNotifyPoliceWhenNoBMWCars(t *testing.T) {
+func TestNotifyPoliceWhenNoCarsParkedInLast30Minutes(t *testing.T) {
 	// Setup
 	lotA := NewParkingLot("A", 5)                   // Create a parking lot with 5 spots
 	lotB := NewParkingLot("B", 5)                   // Create another parking lot with 5 spots
 	handicapLot := NewParkingLot("Handicap Lot", 3) // Special lot for handicap cars
 	attendant := ParkingAttendant{Name: "Rahul"}
 
-	// Park a non-BMW car in lot A
-	car1 := Car{LicensePlate: "GT123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
+	// Park a car more than 30 minutes ago
+	car1 := Car{LicensePlate: "ABC123", Make: "Toyota", Model: "Camry", Color: "Blue", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car1)
 
-	// Park a non-BMW car in lot B
-	car2 := Car{LicensePlate: "RD456", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
+	// Wait for more than 30 minutes to simulate the 30-minute threshold
+	time.Sleep(30 * time.Minute)
+
+	// Park another car more than 30 minutes ago
+	car2 := Car{LicensePlate: "XYZ456", Make: "Honda", Model: "Civic", Color: "Red", Size: "medium"}
 	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car2)
 
-	// Notify police about the location of all BMW cars (expecting no cars)
-	lotA.NotifyPolice("BMW", "Black")
-	lotB.NotifyPolice("BMW", "Black")
-	handicapLot.NotifyPolice("BMW", "Black")
+	// Simulate parking a car more than 30 minutes ago
+	car3 := Car{LicensePlate: "DEF789", Make: "Ford", Model: "Focus", Color: "Green", Size: "large"}
+	attendant.DirectCarToLot([]*ParkingLot{lotA, lotB, handicapLot}, car3)
+
+	// Notify police about the cars parked in the last 30 minutes (expecting no cars)
+	lotA.NotifyPolice()
+	lotB.NotifyPolice()
+	handicapLot.NotifyPolice()
 }
